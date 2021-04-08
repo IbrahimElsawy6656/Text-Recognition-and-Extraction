@@ -1,0 +1,44 @@
+import cv2
+import csv
+import pytesseract
+from pytesseract import Output
+pytesseract.pytesseract.tesseract_cmd = 'C:\\ProgramFiles\\Tesseract-OCR\\tesseract.exe'
+
+#Input Image
+Input = cv2.imread("Untitled.png")
+#GrayScale Image
+Gray = cv2.cvtColor(Input, cv2.COLOR_BGR2GRAY)
+#Thresholding
+Threshold = cv2.threshold(Gray, 0,
+255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+#Details in image
+Details = pytesseract.image_to_data(Threshold,output_type
+= Output.DICT ,config = r'--oem 3 --psm 6', lang= "eng")
+print(Details.keys())
+#Highlighting the words
+boxes = len (Details['text'])
+for sequence_number in range(boxes):
+if int(Details['conf'][sequence_number]) > 30:
+(x, y, w, h) =
+(Details['left'][sequence_number],Details['top'][sequence_number],Details['width'][sequence_number],Details['height'][sequence_number])
+Threshold = cv2.rectangle(Threshold, (x, y), (x + w, y+h), (0, 255, 0), 2)
+#Cutting words into array
+parse_text = []
+words = []
+Last = ''
+length = 0
+for word in Details['text']:
+if word!='':
+words.append(word)
+Last = word
+length += len(word)
+if (Last!='' and word == '') or (word==Details['text'][-1]):
+parse_text.append(words)
+words = []
+words = []
+Last = ''
+no_char = "number of charachters in this file is " + str(length)
+with open("Output.txt", "w", newline = "") as file:
+csv.writer(file, delimiter = " ").writerows(parse_text)
+with open("output.txt","a") as file_object :
+file_object.write(no_char)
